@@ -1,4 +1,5 @@
-from flask import request, jsonify
+from flask import request, jsonify, session
+from hashlib import sha256
 from app import app
 from .models import User
 
@@ -10,7 +11,9 @@ def hello_world():
 def register():
     try:
         user = User(request.form['username'])
-        if (user.add(request.form['password']) == False):
+        if ("ID" in session):
+            dest = {"error" : "internal error"}
+        elif (user.add(request.form['password']) == False):
             dest = {"error" : "account already exists"}
         else:
             dest = {"result" : "account created"}
@@ -20,11 +23,26 @@ def register():
 
 @app.route('/signin', methods=['POST'])
 def signin():
-    return ("Work in progress")
+    try:
+        user = User.get_by_name(request.form['username'])
+        if ("ID" in session):
+            dest = {"error" : "internal error"}
+        elif (user == None or
+        str(sha256(str(request.form['password']).encode('utf-8')).digest()) != user.password):
+            dest = {"error" : "login or password does not match"}
+        else:
+            session['ID'] = user.user_id
+            dest = {"result" : "signin successful"}
+    except:
+        dest = {"error" : "internal error"}
+    return (dest)
 
 @app.route('/signout', methods=['POST'])
 def signout():
-    return ("Work in progress")
+    if ("ID" in session):
+        session.pop("ID", None)
+        return ({"result" : "signout successful"})
+    return (jsonify(None))
 
 @app.route('/user', methods=['GET'])
 def get_user():

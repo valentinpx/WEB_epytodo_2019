@@ -9,7 +9,6 @@ class User(db.Model):
 
     def __init__(self, username):
         self.username = username
-        self.password = None
 
     @staticmethod
     def get_by_name(name):
