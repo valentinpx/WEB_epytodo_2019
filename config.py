@@ -1,2 +1,2 @@
-DEBUG   =   True
-TESTING =   True
+DEBUG = True
+SQLALCHEMY_DATABASE_URI = "mysql://root@localhost/epytodo"

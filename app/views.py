@@ -1,4 +1,6 @@
+from flask import request, jsonify
 from app import app
+from .models import User
 
 @app.route('/')
 def hello_world():
@@ -6,7 +8,15 @@ def hello_world():
 
 @app.route('/register', methods=['POST'])
 def register():
-    return ("Work in progress")
+    try:
+        user = User(request.form['username'])
+        if (user.add(request.form['password']) == False):
+            dest = {"error" : "account already exists"}
+        else:
+            dest = {"result" : "account created"}
+    except:
+        dest = {"error" : "internal error"}
+    return (dest)
 
 @app.route('/signin', methods=['POST'])
 def signin():
