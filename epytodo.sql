@@ -20,6 +20,9 @@ SET time_zone = "+00:00";
 -- Base de données :  `epytodo`
 --
 
+CREATE DATABASE IF NOT EXISTS epytodo;
+USE epytodo;
+
 -- --------------------------------------------------------
 
 --
@@ -30,7 +33,7 @@ CREATE TABLE `task` (
   `task_id` int(11) NOT NULL,
   `title` varchar(256) NOT NULL,
   `begin` datetime NOT NULL,
-  `end` datetime NOT NULL,
+  `end` datetime,
   `status` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
