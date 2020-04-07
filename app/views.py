@@ -5,8 +5,6 @@ from .models import User, Task
 
 @app.route("/")
 def hello_world():
-    user = User.get_by_name("ui")
-    print(user.tasks[0].title)
     return ("<a href=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ?t=1\">Hello, World!</a>")
 
 @app.route("/register", methods=["POST"])
@@ -48,11 +46,19 @@ def signout():
 
 @app.route("/user", methods=["GET"])
 def get_user():
-    return ("Work in progress")
+    if (not "ID" in session):
+        return ({"error" : "you must be logged in"})
+    user = User.get_by_id(session["ID"]).tasks
+    return ({"user_id" : user.user_id, "username" : user.username})
 
 @app.route("/user/task", methods=["GET"])
 def get_task():
-    return ("Work in progress")
+    if (not "ID" in session):
+        return ({"error" : "you must be logged in"})
+    dest = []
+    for task in User.get_by_id(session["ID"]).tasks:
+        dest.append({"id" : task.task_id, "title" : task.title, "begin" : task.begin, "end" : task.end, "status" : task.status})
+    return (jsonify(dest))
 
 @app.route("/user/task/<int:id>", methods=["GET", "POST"])
 def update_task(id):
