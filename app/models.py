@@ -13,6 +13,10 @@ class User(db.Model):
     @staticmethod
     def get_by_name(name):
         return (User.query.filter_by(username=name).first())
+    
+    @staticmethod
+    def get_by_id(id):
+        return (User.query.get(id))
 
     def add(self, password):
         if (User.get_by_name(self.username) != None):
