@@ -32,6 +32,12 @@ class User(db.Model):
         db.session.commit()
         return (True)
 
+    def has_task(self, task_id):
+        for user_task in self.tasks:
+            if (user_task.task_id == task_id):
+                return (True)
+        return (False)
+
 class Task(db.Model):
     __tablename__ = "task"
     task_id = db.Column("task_id", db.Integer, primary_key=True)
@@ -43,11 +49,17 @@ class Task(db.Model):
     def __init__(self, title):
         self.title = title
     
+    @staticmethod
+    def get_by_id(id):
+        return (Task.query.get(id))
+
     def add(self, id, request):
         if ("begin" in request.form):
             self.begin = request["begin"]
         if ("end" in request.form):
             self.end = request["end"]
+            if (self.end < self.begin):
+                self.end = None
         if ("status" in request.form):
             if (request.form["status"] == "not started"):
                 self.status = 0
@@ -63,3 +75,23 @@ class Task(db.Model):
         db.session.add(user)
         db.session.commit()
         return (True)
+
+    def update(self, request):
+        if ("title" in request.form):
+            self.title = request.form["title"]
+        if ("begin" in request.form):
+            self.begin = request.form["begin"]
+        if ("end" in request.form):
+            self.end = request.form["end"]
+            if (self.end < self.begin):
+                self.end = None
+        if ("status" in request.form):
+            self.status = request.form["status"]
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        id = self.task_id
+        db.session.delete(self)
+        db.session.commit()
+        db.engine.execute("DELETE FROM user_has_task WHERE `fk_task_id`=" + str(id) + ";")

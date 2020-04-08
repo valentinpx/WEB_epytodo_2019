@@ -2,6 +2,20 @@ from flask import request, jsonify, session
 from hashlib import sha256
 from app import app
 from .models import User, Task
+from datetime import datetime
+
+def format_t(time):
+    if (time != None):
+        return (time.strftime("%Y-%m-%d %H:%M:%S"))
+    return (None)
+
+def get_status(nb):
+    status = "not started"
+    if (nb == 1):
+        status = "in progress"
+    if (nb == 2):
+        status = "done"
+    return (status)
 
 @app.route("/")
 def hello_world():
@@ -48,8 +62,10 @@ def signout():
 def get_user():
     if (not "ID" in session):
         return ({"error" : "you must be logged in"})
-    user = User.get_by_id(session["ID"]).tasks
-    return ({"user_id" : user.user_id, "username" : user.username})
+    user = User.get_by_id(session["ID"])
+    if (user is None):
+        return ({"error" : "internal error"})
+    return ({"result" : {"user_id" : user.user_id, "username" : user.username}})
 
 @app.route("/user/task", methods=["GET"])
 def get_task():
@@ -57,12 +73,29 @@ def get_task():
         return ({"error" : "you must be logged in"})
     dest = []
     for task in User.get_by_id(session["ID"]).tasks:
-        dest.append({"id" : task.task_id, "title" : task.title, "begin" : task.begin, "end" : task.end, "status" : task.status})
-    return (jsonify(dest))
+        status = get_status(task.status)
+        dest.append({task.task_id : {"title" : task.title, "begin" : format_t(task.begin), "end" : format_t(task.end), "status" : status}})
+    return ({"result" : {"tasks" : dest}})
 
 @app.route("/user/task/<int:id>", methods=["GET", "POST"])
 def update_task(id):
-    return ("Work in progress")
+    if (not "ID" in session):
+        return ({"error" : "you must be logged in"})
+    user = User.get_by_id(session["ID"])
+    task = Task.get_by_id(id)
+    if (task == None):
+        return ({"error" : "task id does not exist"})
+    if (user.has_task(task.task_id) == False):
+        return ({"error" : "internal error"})
+    
+    if (request.method == "GET"):
+        return ({"result" : {"title" : task.title, "begin" : format_t(task.begin), "end" : format_t(task.end), "status" : get_status(task.status)}})
+    try:
+        task.update(request)
+        dest = {"result" : "update done"}
+    except:
+        dest = {"error" : "internal error"}
+    return (dest)
 
 @app.route("/user/task/add", methods=["POST"])
 def add_task():
@@ -79,4 +112,13 @@ def add_task():
 
 @app.route("/user/task/del/<int:id>", methods=["POST"])
 def del_task(id):
-    return ("Work in progress")
+    if (not "ID" in session):
+        return ({"error" : "you must be logged in"})
+    user = User.get_by_id(session["ID"])
+    task = Task.get_by_id(id)
+    if (task == None):
+        return ({"error" : "task id does not exist"})
+    if (user.has_task(task.task_id) == False):
+        return ({"error" : "internal error"})
+    task.delete()
+    return ({"result" : "task deleted"})
