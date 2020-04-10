@@ -6,4 +6,4 @@ try:
     from app import app
     app.run()
 except:
-    print("Failed to import required modules. Try to run:\npip3 install --no-cache-dir -r requirements.txt")
+    print("Failed to launch the app. Try to install required modules via:\npip3 install --no-cache-dir -r requirements.txt")
