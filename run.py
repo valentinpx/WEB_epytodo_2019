@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 try:
-    import flask
-    import flask_sqlalchemy
     from app import app
     app.run()
 except:
