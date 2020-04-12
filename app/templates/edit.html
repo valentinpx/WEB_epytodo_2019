@@ -32,7 +32,7 @@
                     </div>
                 </form>
                 <form id="delete" method="post">
-                    <button type="submit" class="btn btn-primary">Delete task</button>
+                    <button type="submit" class="btn btn-danger">Delete task</button>
                 </form>
                 <hr>
                 <a href="/home">Back</a>
@@ -60,11 +60,36 @@
         e.preventDefault();
 
         var form = $(this);
-        var url = form.attr('action');
 
         $.ajax({
             type: "POST",
-            url: `/user/task/`,
+            url: `/user/task/${window.location.href.substring(window.location.href.lastIndexOf('/') + 1)}`,
+            data: form.serialize(),
+            success: function(data) {
+                if (!data.result) {
+                    alert(data.error);
+                } else {
+                    window.location = '/home'
+                }
+            },
+            error: function(jqXHR, textStatus) {
+                if (jqXHR.status === 400) {
+                    alert('Invalid form input');
+                } else {
+                    alert(jqXHR.responseText);
+                }
+            }
+        });
+    });
+
+    $("#delete").submit(function(e) {
+        e.preventDefault();
+
+        var form = $(this);
+
+        $.ajax({
+            type: "POST",
+            url: `/user/task/del/${window.location.href.substring(window.location.href.lastIndexOf('/') + 1)}`,
             data: form.serialize(),
             success: function(data) {
                 if (!data.result) {

@@ -7,7 +7,6 @@
             <div class="col-md-12">
                 <h2>User Info</h2>
                 <p>Name: <span id="name">loading</span></p>
-                <p>Email: <span id="email">loading</span></p>
                 <form id="logout" action="/signout" method="post">
                     <button type="submit" class="btn btn-danger" href="/add">Logout</button>
                 </form>
@@ -47,7 +46,6 @@
                 alert(data.error);
             } else {
                 $('#name').html(data.result.username);
-                $('#email').html(data.result.email);
             }
         }
     });
@@ -59,7 +57,9 @@
             if (!data.result) {
                 alert(data.error);
             } else {
-                $.each(data.result.task, function(index, value) {
+                console.log(data.result);
+                $.each(data.result.tasks, function(index, value) {
+                    console.log(value);
                     let el = value[Object.keys(value)[0]];
 
                     if (el.status === 1) {

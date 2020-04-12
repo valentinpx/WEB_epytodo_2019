@@ -55,9 +55,9 @@ class Task(db.Model):
 
     def add(self, id, request):
         if ("begin" in request.form):
-            self.begin = request["begin"]
+            self.begin = request.form["begin"]
         if ("end" in request.form):
-            self.end = request["end"]
+            self.end = request.form["end"]
             if (self.end < self.begin):
                 self.end = None
         if ("status" in request.form):
