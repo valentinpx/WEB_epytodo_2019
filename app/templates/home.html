@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="jumbotron">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>User Info</h2>
+                <p>Name: <span id="name">loading</span></p>
+                <p>Email: <span id="email">loading</span></p>
+                <form id="logout" action="/signout" method="post">
+                    <button type="submit" class="btn btn-danger" href="/add">Logout</button>
+                </form>
+            </div>
+            <div class="col-md-12">
+                <hr>
+                <a class="btn btn-primary float-right" href="/add">Add task</a>
+            </div>
+            <div class="col-md-12">
+                <h2>Tasks</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Begin</th>
+                            <th>End</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $.ajax({
+        type: "GET",
+        url: '/user',
+        success: function(data) {
+            if (!data.result) {
+                alert(data.error);
+            } else {
+                $('#name').html(data.result.username);
+                $('#email').html(data.result.email);
+            }
+        }
+    });
+
+    $.ajax({
+        type: "GET",
+        url: '/user/task',
+        success: function(data) {
+            if (!data.result) {
+                alert(data.error);
+            } else {
+                $.each(data.result.task, function(index, value) {
+                    let el = value[Object.keys(value)[0]];
+
+                    if (el.status === 1) {
+                        el.status = 'Not started'
+                    } else if (el.status === 2) {
+                        el.status = 'In progress'
+                    } else {
+                        el.status = 'Done'
+                    }
+
+                    $('tbody').append(`
+                    <tr>
+                        <th>${el.title}</th>
+                        <td>${el.begin}</td>
+                        <td>${el.end || 'Not defined' }</td>
+                        <td>${el.status}</td>
+                        <td>
+                            <a class="btn btn-primary" href="/edit/${Object.keys(value)[0]}">Edit</a>
+                        </td>
+                    </tr>`)
+                })
+            }
+        }
+    });
+
+    $("#login").submit(function(e) {
+        e.preventDefault();
+
+        var form = $(this);
+        var url = form.attr('action');
+
+        $.ajax({
+            type: "POST",
+            url: '/signout',
+            success: function(data) {
+                window.location = '/home'
+            }
+        });
+    });
+</script>
+{% endblock %}

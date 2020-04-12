@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="jumbotron">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Edit task</h2>
+                <form id="edit" method="post">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" class="form-control" name="title" id="title" value="" placeholder="Do something" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="begin">Begin</label>
+                        <input type="date" class="form-control" name="begin" id="begin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end">End</label>
+                        <input type="date" class="form-control" name="end" id="end">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select class="form-control" id="status" name="status">
+                          <option id="v1" value="1">not started</option>
+                          <option id="v2" value="2">in progress</option>
+                          <option id="v3" value="3">done</option>
+                        </select>
+                      </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Add task</button>
+                    </div>
+                </form>
+                <form id="delete" method="post">
+                    <button type="submit" class="btn btn-primary">Delete task</button>
+                </form>
+                <hr>
+                <a href="/home">Back</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $.ajax({
+        type: "GET",
+        url: `/user/task/${window.location.href.substring(window.location.href.lastIndexOf('/') + 1)}`,
+        success: function(data) {
+            if (!data.result) {
+                alert(data.error);
+            } else {
+                $('#title').val(data.result.title);
+            }
+        }
+    });
+
+    $("#edit").submit(function(e) {
+        e.preventDefault();
+
+        var form = $(this);
+        var url = form.attr('action');
+
+        $.ajax({
+            type: "POST",
+            url: `/user/task/`,
+            data: form.serialize(),
+            success: function(data) {
+                if (!data.result) {
+                    alert(data.error);
+                } else {
+                    window.location = '/home'
+                }
+            },
+            error: function(jqXHR, textStatus) {
+                if (jqXHR.status === 400) {
+                    alert('Invalid form input');
+                } else {
+                    alert(jqXHR.responseText);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
